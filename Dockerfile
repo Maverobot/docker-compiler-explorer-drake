@@ -1,7 +1,6 @@
 FROM madduci/docker-linux-cpp:latest
 
-LABEL maintainer="Michele Adduci <adduci@tutanota.com>" \
-      license="Copyright (c) 2012-2021, Matt Godbolt"
+LABEL license="Copyright (c) 2012-2021, Matt Godbolt"
 
 EXPOSE 10240
 
