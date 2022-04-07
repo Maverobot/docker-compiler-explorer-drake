@@ -14,19 +14,33 @@ RUN echo "*** Installing Compiler Explorer ***" \
         ca-certificates \
         nodejs \
         make \
-        git \
-    && apt-get autoremove --purge -y \
+        git
+
+RUN wget https://raw.githubusercontent.com/RobotLocomotion/drake/v1.1.0/setup/ubuntu/binary_distribution/packages-focal.txt
+RUN xargs apt-get install -y < packages-focal.txt
+
+RUN apt-get autoremove --purge -y \
     && apt-get autoclean -y \
-    && rm -rf /var/cache/apt/* /tmp/* \
-    && git clone https://github.com/compiler-explorer/compiler-explorer.git /compiler-explorer \
-    && cd /compiler-explorer \
-    && echo "Add missing dependencies" \
-    && npm i @sentry/node \
+    && rm -rf /var/cache/apt/*
+
+
+RUN git clone https://github.com/compiler-explorer/compiler-explorer.git /opt/compiler-explorer
+
+RUN echo "*** Add missing dependencies of compiler-explorer ***"
+WORKDIR /opt/compiler-explorer
+RUN npm i @sentry/node \
     npm run webpack
 
-ADD cpp.properties /compiler-explorer/etc/config/c++.local.properties
+RUN echo "*** Add drake ***"
+WORKDIR /tmp
+ARG drake_tarball_name="drake-20220328-focal.tar.gz"
+RUN wget https://github.com/RobotLocomotion/drake/releases/download/v1.1.0/$drake_tarball_name
+RUN tar -xzf $drake_tarball_name -C /opt
 
-WORKDIR /compiler-explorer
+RUN rm /tmp/* -rf
+
+WORKDIR /opt/compiler-explorer
+ADD cpp.properties /opt/compiler-explorer/etc/config/c++.local.properties
 
 ENTRYPOINT [ "make" ]
 
